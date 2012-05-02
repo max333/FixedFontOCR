@@ -137,7 +137,8 @@ public class FontGlyph extends Glyph {
       dummyGraphics.dispose();
       dummyImage = null;
 
-      BufferedImage image = new BufferedImage(width + 2 * paddingX, height + 2 * paddingY, IMAGE_TYPE);
+      int actualHeight = height - descent;
+      BufferedImage image = new BufferedImage(width + 2 * paddingX, actualHeight + 2 * paddingY, IMAGE_TYPE);
       Graphics2D graphics = image.createGraphics();
       graphics.setFont(font);
       graphics.setRenderingHints(renderingHints);
@@ -146,7 +147,7 @@ public class FontGlyph extends Glyph {
       if (withDecorations) {
          int counterX = 0;
          int counter = 0;
-         for (int iy = 0; iy < height; iy++)
+         for (int iy = 0; iy < actualHeight; iy++)
             for (int ix = 0; ix < width; ix++)
                if ((ix + iy) % 2 == 0)
                   image.setRGB(ix + paddingX, iy + paddingY, Color.LIGHT_GRAY.getRGB());
@@ -155,13 +156,13 @@ public class FontGlyph extends Glyph {
             Rectangle2D rect = font.getStringBounds(Character.toString(chara), frc);
             int wid = (int) Math.round(rect.getWidth());
             //System.out.printf("%s %d%n", chara, wid);
-            graphics.drawRect(counterX + paddingX, 0 + paddingY, wid - 1, height - 1);
+            graphics.drawRect(counterX + paddingX, 0 + paddingY, wid - 1, actualHeight - 1);
             counterX += wid;
             counter++;
          }
       }
       graphics.setColor(Glyph.FOREGROUND_COLOR);
-      graphics.drawString(string, 0 + paddingX, height - descent + paddingY);
+      graphics.drawString(string, 0 + paddingX, actualHeight - descent + paddingY);
       return image;
    }
 
