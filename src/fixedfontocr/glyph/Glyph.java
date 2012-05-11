@@ -14,16 +14,15 @@ import java.util.Objects;
 /**
  * A fixed arrangement of pixels within a box of a specified dimension. The pixels have no color,
  * but are simply active or inactive. Only the active pixels are stored in an array. The pixels must
- * be ordered increasingly in x, and the pixels in each column are ordered increasingly in y. 
- * 
- * <p>
- * The hash code is computed during construction and cached.
+ * be ordered increasingly in x, and the pixels in each column are ordered increasingly in y.
+ *
+ * <p> The hash code is computed during construction and cached.
  */
 public class Glyph {
 
    public static final int IMAGE_TYPE = BufferedImage.TYPE_INT_RGB;
-   public static final Color FOREGROUND_COLOR = Color.BLACK;
-   public static final Color BACKGROUND_COLOR = Color.WHITE;
+   public static final Color DEFAULT_FOREGROUND_COLOR = Color.BLACK;
+   public static final Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
    protected Dimension dimension;
    protected List<Point> activePixels;
    protected int cachedHashCode;
@@ -47,21 +46,21 @@ public class Glyph {
    }
 
    /**
-    * The active pixels are those of color {@code Glyph.FOREGROUND_COLOR}.
+    * The active pixels are those of color {@code Glyph.DEFAULT_FOREGROUND_COLOR}.
     */
-   public Glyph(BufferedImage image) {
-      this(image, new Point(0, 0), new Dimension(image.getWidth(), image.getHeight()));
+   public Glyph(BufferedImage image, Color activeColor) {
+      this(image, activeColor, new Point(0, 0), new Dimension(image.getWidth(), image.getHeight()));
    }
 
    /**
     * Build a Glyph from the sub-image of dimension {@code dimension} starting at {@code start}.
     */
-   public Glyph(BufferedImage image, Point start, Dimension dimension) {
+   public Glyph(BufferedImage image, Color activeColor, Point start, Dimension dimension) {
       this.dimension = dimension;
       activePixels = new ArrayList<>();
       for (int ix = start.x; ix < start.x + dimension.width; ix++) {
          for (int iy = start.y; iy < start.y + dimension.height; iy++) {
-            if (image.getRGB(ix, iy) == FOREGROUND_COLOR.getRGB())
+            if (image.getRGB(ix, iy) == activeColor.getRGB())
                activePixels.add(new Point(ix - start.x, iy - start.y));
          }
       }
@@ -84,11 +83,11 @@ public class Glyph {
       int height = dimension.height;
       BufferedImage image = new BufferedImage(width, height, IMAGE_TYPE);
       Graphics2D g = image.createGraphics();
-      g.setColor(BACKGROUND_COLOR);
+      g.setColor(DEFAULT_BACKGROUND_COLOR);
       g.drawRect(0, 0, width, height);
       g.dispose();
       for (Point pixel : activePixels)
-         image.setRGB(pixel.x, pixel.y, FOREGROUND_COLOR.getRGB());
+         image.setRGB(pixel.x, pixel.y, DEFAULT_FOREGROUND_COLOR.getRGB());
       return image;
    }
 

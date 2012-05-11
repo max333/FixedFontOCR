@@ -1,5 +1,8 @@
 package fixedfontocr;
 
+import fixedfontocr.glyph.FontGlyph;
+import fixedfontocr.glyph.Glyph;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -8,8 +11,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import fixedfontocr.glyph.FontGlyph;
-import fixedfontocr.glyph.Glyph;
 
 /**
  * Builds a search tree recursively for an alphabet of Glyphs. When creating the head node, the
@@ -114,7 +115,7 @@ public class SearchNode {
    /**
     * @return null if found no matching glyph.
     */
-   public FontGlyph findLongestMatch(BufferedImage image, Point topLeft_) {
+   public FontGlyph findLongestMatch(BufferedImage image, Color fontColor, Point topLeft_) {
       Point topLeft = new Point(topLeft_.x, topLeft_.y);
       FontGlyph longestMatch = null;
       SearchNode nextNode = this;
@@ -126,7 +127,7 @@ public class SearchNode {
          if (image.getWidth() < (topLeft.x + subGlyphWidth)) {
             nextNode = null; // running out of image to find longer matches.
          } else {
-            Glyph subGlyph = new Glyph(image, topLeft, new Dimension(subGlyphWidth, lineHeight));
+            Glyph subGlyph = new Glyph(image, fontColor, topLeft, new Dimension(subGlyphWidth, lineHeight));
             nextNode = currentNode.findNextNode(subGlyph); // could be null
             topLeft.x += subGlyphWidth;
          }

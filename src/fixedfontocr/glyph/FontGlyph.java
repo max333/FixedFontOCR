@@ -21,6 +21,9 @@ import java.util.Map;
  * Do not use this class directly, use its subclass ContextualFontGlyph instead, unless you are
  * certain the font you are using does not leak pixels out of the bounding box of the characters.
  *
+ * The height of a glyph for a specified font is given by
+ * {@code Math.round(lineMetrics.getHeight())}. All characters for a specified font have the same
+ * height.
  */
 public class FontGlyph extends Glyph {
 
@@ -36,7 +39,7 @@ public class FontGlyph extends Glyph {
       this.font = font;
       BufferedImage image = makeImage(generatingString, font);
       this.lineMetrics = FontGlyph.getLineMetrics(font);
-      Glyph temp = new Glyph(image);
+      Glyph temp = new Glyph(image, Glyph.DEFAULT_FOREGROUND_COLOR);
       this.dimension = temp.dimension;
       this.activePixels = temp.activePixels;
       this.cachedHashCode = temp.cachedHashCode;
@@ -92,7 +95,7 @@ public class FontGlyph extends Glyph {
       FontGlyph.renderingHints = renderingHints;
    }
 
-   public static List<FontGlyph> processAlphabet(List<String> alphabet, Font font) {
+   public static List<FontGlyph> buildGlyphsFromAlphabet(List<String> alphabet, Font font) {
       List<FontGlyph> output = new ArrayList<>(alphabet.size());
       for (String letter : alphabet)
          output.add(new FontGlyph(letter, font));
@@ -109,6 +112,7 @@ public class FontGlyph extends Glyph {
 
    /**
     * If no value is given for renderingHints, the image is NOT anti-aliased.
+    * The background/foreground colors are those DEFAULT_BACKGROUND_COLOR and DEFAULT_FOREGROUND_COLOR.
     */
    public static BufferedImage makeImage(String string, Font font, int paddingX, int paddingY, boolean withDecorations) {
       // TODO ?? ugly
@@ -142,7 +146,7 @@ public class FontGlyph extends Glyph {
       Graphics2D graphics = image.createGraphics();
       graphics.setFont(font);
       graphics.setRenderingHints(renderingHints);
-      graphics.setColor(Glyph.BACKGROUND_COLOR);
+      graphics.setColor(Glyph.DEFAULT_BACKGROUND_COLOR);
       graphics.fillRect(0, 0, image.getWidth(), image.getHeight());
       if (withDecorations) {
          int counterX = 0;
@@ -161,30 +165,37 @@ public class FontGlyph extends Glyph {
             counter++;
          }
       }
-      graphics.setColor(Glyph.FOREGROUND_COLOR);
+      graphics.setColor(Glyph.DEFAULT_FOREGROUND_COLOR);
       graphics.drawString(string, 0 + paddingX, actualHeight - descent + paddingY);
       return image;
    }
 
-   public static BufferedImage makeMultiLineImage(List<String> lines, Font font, int pixelsBetweenLines) {
+   /**
+    * The background/foreground colors are those DEFAULT_BACKGROUND_COLOR and DEFAULT_FOREGROUND_COLOR.
+    */
+   public static BufferedImage makeMultiLineImage(List<String> lines, Font font, int lineHeight) {
+      if (lines.isEmpty())
+         throw new IllegalArgumentException("Must give some lines to draw.");
       List<BufferedImage> images = new ArrayList<>(lines.size());
       for (String line : lines)
          images.add(makeImage(line, font));
+      int glyphHeight = images.get(0).getHeight();
+      int nEmptyRowsBetweenLines = lineHeight - glyphHeight;
+
+      int height = lines.size() * lineHeight;
       int width = 0;
-      int height = 0;
-      for (BufferedImage subImage : images) {
+      for (BufferedImage subImage : images)
          if (subImage.getWidth() > width)
             width = subImage.getWidth();
-         height += subImage.getHeight();
-      }
-      height += pixelsBetweenLines * (images.size() - 1);
-      BufferedImage image = new BufferedImage(width, height, IMAGE_TYPE);
+
+      BufferedImage image = new BufferedImage(width, height, Glyph.IMAGE_TYPE);
       Graphics2D graphics = image.createGraphics();
+      graphics.setColor(Glyph.DEFAULT_BACKGROUND_COLOR);
       graphics.fillRect(0, 0, width, height);
-      int currentHeight = 0;
+      int currentHeight = nEmptyRowsBetweenLines;
       for (BufferedImage subImage : images) {
          graphics.drawImage(subImage, null, 0, currentHeight);
-         currentHeight += subImage.getHeight() + pixelsBetweenLines;
+         currentHeight += lineHeight;
       }
       return image;
    }

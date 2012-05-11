@@ -2,6 +2,7 @@ package fixedfontocr;
 
 import fixedfontocr.glyph.ContextualFontGlyph;
 import fixedfontocr.glyph.FontGlyph;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -24,16 +25,17 @@ public class ContextualSearchTreeOCR extends SearchTreeOCR {
 
    public ContextualSearchTreeOCR(List<String> alphabet, Font font) {
       super(alphabet, font);
-      List<FontGlyph> originalGlyphs = FontGlyph.processAlphabet(alphabet, font);
+      List<FontGlyph> originalGlyphs = FontGlyph.buildGlyphsFromAlphabet(alphabet, font);
       FontGlyphClassifier classifier = new FontGlyphClassifier(originalGlyphs);
       standardStartAlphabet = classifier.getAllGlyphsNotRequiringPrecedingGlyph();
       startOfLineAlphabet = classifier.getAllGlyphsWhichCanStartALine();
    }
 
    @Override
-   public List<FontGlyph> detectGlyphsOnOneLine(BufferedImage image, Point topLeft) {
+   public List<FontGlyph> detectGlyphsOnOneLine(BufferedImage image, Color fontColor, Point topLeft) {
       Point topLeftCopy = new Point(topLeft.x, topLeft.y);
-      return detectGlyphsOnOneLineRecursive(image, topLeftCopy, getSearchNode(startOfLineAlphabet), true);
+      return detectGlyphsOnOneLineRecursive(image, fontColor, topLeftCopy,
+              getSearchNode(startOfLineAlphabet), true);
    }
 
    /**
@@ -41,10 +43,10 @@ public class ContextualSearchTreeOCR extends SearchTreeOCR {
     * ContextualFontGlyph and it does not respect its conditions (cannot start a line, or must be
     * followed by some specified glyphs).
     */
-   protected List<FontGlyph> detectGlyphsOnOneLineRecursive(BufferedImage image, Point topLeft,
-           SearchNode startNode, boolean isStartOfLine) {
+   protected List<FontGlyph> detectGlyphsOnOneLineRecursive(BufferedImage image, Color fontColor,
+           Point topLeft, SearchNode startNode, boolean isStartOfLine) {
 
-      FontGlyph detectedGlyph = startNode.findLongestMatch(image, topLeft);
+      FontGlyph detectedGlyph = startNode.findLongestMatch(image, fontColor, topLeft);
       if (detectedGlyph == null)
          return null;
 
@@ -57,13 +59,13 @@ public class ContextualSearchTreeOCR extends SearchTreeOCR {
             successorGlyphs.addAll(standardStartAlphabet);
 
          topLeft.x += detectedGlyph.getDimension().width;
-         followingGlyphs = detectGlyphsOnOneLineRecursive(image, topLeft, getSearchNode(successorGlyphs), false);
+         followingGlyphs = detectGlyphsOnOneLineRecursive(image, fontColor, topLeft, getSearchNode(successorGlyphs), false);
 
          if (contextualGlyph.requiresSuccessorGlyph() && (followingGlyphs == null || followingGlyphs.isEmpty()))
             return null;
       } else {
          topLeft.x += detectedGlyph.getDimension().width;
-         followingGlyphs = detectGlyphsOnOneLineRecursive(image, topLeft, getSearchNode(standardStartAlphabet), false);
+         followingGlyphs = detectGlyphsOnOneLineRecursive(image, fontColor, topLeft, getSearchNode(standardStartAlphabet), false);
       }
       List<FontGlyph> matchedGlyphs = new ArrayList<>();
       matchedGlyphs.add(detectedGlyph);
@@ -71,7 +73,6 @@ public class ContextualSearchTreeOCR extends SearchTreeOCR {
          matchedGlyphs.addAll(followingGlyphs);
       return matchedGlyphs;
    }
-
 
    protected SearchNode getSearchNode(Set<FontGlyph> successorGlyphs) {
       if (!nodesCache.containsKey(successorGlyphs))

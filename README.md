@@ -13,4 +13,4 @@ It can make some "mistakes" since some characters in some fonts have the exact s
 For example, upper case 'o' might be identical to zero and capital 'i', the letter 'l' and the 
 vertical bar might also have the same glyph. 
 
-You can see an example in fixedfontocr.utilities.Utilities.main.
+You can see some usage examples in the test directory.
