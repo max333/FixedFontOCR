@@ -1,6 +1,5 @@
 package fixedfontocr.glyph;
 
-import com.sun.org.apache.xpath.internal.axes.SubContextList;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -39,10 +38,10 @@ public class FontGlyph extends Glyph {
       this.font = font;
       BufferedImage image = makeImage(generatingString, font);
       this.lineMetrics = FontGlyph.getLineMetrics(font);
-      Glyph temp = new Glyph(image, Glyph.DEFAULT_FOREGROUND_COLOR);
-      this.dimension = temp.dimension;
-      this.activePixels = temp.activePixels;
-      this.cachedHashCode = temp.cachedHashCode;
+      Glyph tempGlyph = new Glyph(image, Glyph.DEFAULT_FOREGROUND_COLOR);
+      this.dimension = tempGlyph.dimension;
+      this.activePixels = tempGlyph.activePixels;
+      this.cachedHashCode = tempGlyph.cachedHashCode;
    }
 
    public FontGlyph(FontGlyph fGlyph) {
@@ -57,6 +56,10 @@ public class FontGlyph extends Glyph {
       this.generatingString = generatingString;
       this.font = font;
       this.lineMetrics = FontGlyph.getLineMetrics(font);
+   }
+
+   protected FontGlyph(String generatingString) {
+      this(generatingString, null);
    }
 
    protected FontGlyph() {
@@ -111,8 +114,8 @@ public class FontGlyph extends Glyph {
    }
 
    /**
-    * If no value is given for renderingHints, the image is NOT anti-aliased.
-    * The background/foreground colors are those DEFAULT_BACKGROUND_COLOR and DEFAULT_FOREGROUND_COLOR.
+    * If no value is given for renderingHints, the image is NOT anti-aliased. The
+    * background/foreground colors are those DEFAULT_BACKGROUND_COLOR and DEFAULT_FOREGROUND_COLOR.
     */
    public static BufferedImage makeImage(String string, Font font, int paddingX, int paddingY, boolean withDecorations) {
       // TODO ?? ugly
@@ -171,7 +174,8 @@ public class FontGlyph extends Glyph {
    }
 
    /**
-    * The background/foreground colors are those DEFAULT_BACKGROUND_COLOR and DEFAULT_FOREGROUND_COLOR.
+    * The background/foreground colors are those DEFAULT_BACKGROUND_COLOR and
+    * DEFAULT_FOREGROUND_COLOR.
     */
    public static BufferedImage makeMultiLineImage(List<String> lines, Font font, int lineHeight) {
       if (lines.isEmpty())
@@ -198,5 +202,41 @@ public class FontGlyph extends Glyph {
          currentHeight += lineHeight;
       }
       return image;
+   }
+
+   /////////////////////////////////////////////////////////////////////////////////////////////
+   /**
+    * Bitmap fonts are barely used anymore, so FontGlyph (for scalable fonts) 
+    * should normally be used instead.
+    */
+   // FontGlyph should have been made an abstract class with subclasses BitmapFontGlyph and
+   // ScalableFontGlyph.  But bitmap fonts are so rarely used that this "ugly" subclass to
+   // the scalable FontGlyph is used instead.
+   public static class Bitmap extends FontGlyph {
+
+      protected String fontName;
+
+      public Bitmap(String generatingString, BufferedImage characterImage, Color fontColor, String fontName) {
+         super(generatingString);
+         this.fontName = fontName;
+         Glyph tempGlyph = new Glyph(characterImage, fontColor);
+         this.dimension = tempGlyph.dimension;
+         this.activePixels = tempGlyph.activePixels;
+         this.cachedHashCode = tempGlyph.cachedHashCode;
+      }
+
+      public String getFontName() {
+         return fontName;
+      }
+
+      @Override
+      public Font getFont() {
+         throw new UnsupportedOperationException("Use getFontName() instead");
+      }
+
+      @Override
+      public LineMetrics getLineMetrics() {
+         throw new UnsupportedOperationException();
+      }
    }
 }

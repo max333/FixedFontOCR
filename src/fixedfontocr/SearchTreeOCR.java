@@ -1,17 +1,15 @@
 package fixedfontocr;
 
+import fixedfontocr.glyph.FontGlyph;
+import fixedfontocr.glyph.Glyph;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import fixedfontocr.glyph.FontGlyph;
-import fixedfontocr.glyph.Glyph;
-import java.awt.Color;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Given a few columns of pixels, the search tree can figure out which branch (SearchNode) to
@@ -22,21 +20,21 @@ import java.util.Collections;
 public abstract class SearchTreeOCR {
 
    protected Font font;
-   protected List<FontGlyph> glyphs;
+   protected List<FontGlyph> fontGlyphs;
    protected int glyphHeight;
 
    public SearchTreeOCR(List<String> alphabet, Font font) {
       this(FontGlyph.buildGlyphsFromAlphabet(alphabet, font));
    }
 
-   public SearchTreeOCR(List<FontGlyph> glyphs) {
-      this.glyphs = glyphs;
-      if (glyphs.isEmpty())
+   public SearchTreeOCR(List<FontGlyph> fontGlyphs) {
+      this.fontGlyphs = fontGlyphs;
+      if (fontGlyphs.isEmpty())
          throw new IllegalArgumentException("Must have some glyphs.");
 
-      glyphHeight = glyphs.get(0).getDimension().height;
-      font = glyphs.get(0).getFont();
-      for (FontGlyph glyph : glyphs) {
+      glyphHeight = fontGlyphs.get(0).getDimension().height;
+      font = fontGlyphs.get(0).getFont();
+      for (FontGlyph glyph : fontGlyphs) {
          if (glyph.getDimension().height != glyphHeight)
             throw new IllegalArgumentException("Expecting all glyphs to have the same height.");
          if (glyph.getFont() != font)
@@ -130,8 +128,8 @@ public abstract class SearchTreeOCR {
    }
 
    /**
-    * The glyph height depends on how {@code FontGlyph} builds the glyphs for a specified font.
-    * All glyphs for a specified font have the same height.
+    * The glyph height depends on how {@code FontGlyph} builds the fontGlyphs for a specified font.
+    * All fontGlyphs for a specified font have the same height.
     */
    public int getGlyphHeight() {
       return glyphHeight;
@@ -141,7 +139,7 @@ public abstract class SearchTreeOCR {
     * @return an unmodifiable list of the {@code FontGlyph}s.
     */
    public List<FontGlyph> getGlyphs() {
-      return Collections.unmodifiableList(glyphs);
+      return Collections.unmodifiableList(fontGlyphs);
    }
    
    
@@ -161,9 +159,9 @@ public abstract class SearchTreeOCR {
          this(FontGlyph.buildGlyphsFromAlphabet(alphabet, font));
       }
 
-      public NonContextual(List<FontGlyph> glyphs) {
-         super(glyphs);
-         this.headNode = new SearchNode(glyphs);
+      public NonContextual(List<FontGlyph> fontGlyphs) {
+         super(fontGlyphs);
+         this.headNode = new SearchNode(fontGlyphs);
       }
 
       @Override
