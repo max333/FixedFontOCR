@@ -1,6 +1,6 @@
 package fixedfontocr;
 
-import fixedfontocr.glyph.ContextualFontGlyph;
+import fixedfontocr.glyph.FontGlyphWithLeakedPixels;
 import fixedfontocr.glyph.FontGlyph;
 import fixedfontocr.glyph.LeakingFontGlyph;
 import java.awt.Point;
@@ -13,16 +13,16 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * First finds the symbols that leak pixels outside their bounding boxes and then build all possible
+ * First finds the symbols that leak pixels outside their bounding boxes and then builds all possible
  * glyphs by combining pixels from a glyphs and those leaked by its neighbors.
  */
-public class FontGlyphClassifier {
+public class GeneratorOfFontGlyphsWithLeakedPixels {
 
    // nonContextualGlyphs: Standard glyphs which do not contain extra pixels from their neighbors.
    // Not that a glyph that receives some pixels from neighbors, but those pixels just overlap
    // existing pixels, then the glyph is also moved to contextualGlyphs.
    protected List<FontGlyph> nonContextualGlyphs;
-   protected Set<ContextualFontGlyph> contextualGlyphs;
+   protected Set<FontGlyphWithLeakedPixels> contextualGlyphs;
    protected Set<FontGlyph> allGlyphs;
    protected Set<FontGlyph> allGlyphsNotRequiringPrecedingGlyph;
    protected Set<FontGlyph> allGlyphsWhichCanStartALine;
@@ -31,7 +31,7 @@ public class FontGlyphClassifier {
    protected Map<FontGlyph, Set<FontGlyph>> mapGlyphToGlyphOnLeft;
    protected Map<FontGlyph, Set<FontGlyph>> mapGlyphToGlyphOnRight;
 
-   public FontGlyphClassifier(List<FontGlyph> originalGlyphs) {
+   public GeneratorOfFontGlyphsWithLeakedPixels(List<FontGlyph> originalGlyphs) {
       nonContextualGlyphs = new ArrayList<>();
       nonContextualGlyphs.addAll(originalGlyphs);  // but the leakers are removed below
 
@@ -53,8 +53,8 @@ public class FontGlyphClassifier {
       newGlyphs.addAll(mapGlyphToGlyphOnRight.keySet());
       contextualGlyphs = new HashSet<>();
       for (FontGlyph newGlyph : newGlyphs) {
-         ContextualFontGlyph newContextualGlyph =
-                 new ContextualFontGlyph(newGlyph,
+         FontGlyphWithLeakedPixels newContextualGlyph =
+                 new FontGlyphWithLeakedPixels(newGlyph,
                  mapGlyphToGlyphOnLeft.get(newGlyph), mapGlyphToGlyphOnRight.get(newGlyph));
          contextualGlyphs.add(newContextualGlyph);
       }
@@ -64,12 +64,12 @@ public class FontGlyphClassifier {
       allGlyphs.addAll(contextualGlyphs);
       allGlyphsNotRequiringPrecedingGlyph = new HashSet<>();
       allGlyphsNotRequiringPrecedingGlyph.addAll(nonContextualGlyphs);
-      for (ContextualFontGlyph glyph : contextualGlyphs)
+      for (FontGlyphWithLeakedPixels glyph : contextualGlyphs)
          if (!glyph.requiresPrecedingGlyph())
             allGlyphsNotRequiringPrecedingGlyph.add(glyph);
       allGlyphsWhichCanStartALine = new HashSet<>();
       allGlyphsWhichCanStartALine.addAll(nonContextualGlyphs);
-      for (ContextualFontGlyph glyph : contextualGlyphs)
+      for (FontGlyphWithLeakedPixels glyph : contextualGlyphs)
          if (!glyph.canStartLine())
             allGlyphsWhichCanStartALine.add(glyph);
    }
@@ -153,7 +153,7 @@ public class FontGlyphClassifier {
       return Collections.unmodifiableSet(allGlyphsWhichCanStartALine);
    }
 
-   public Set<ContextualFontGlyph> getContextualGlyphs() {
+   public Set<FontGlyphWithLeakedPixels> getContextualGlyphs() {
       return Collections.unmodifiableSet(contextualGlyphs);
    }
 

@@ -79,7 +79,7 @@ public class SearchNode {
             mapToListGlyphs.get(subGlyph).add(glyph);
          }
       }
-      if (false) {
+      if (false) { // TODO ??
          Map<Integer, Integer> listLengthCounter = new HashMap<>();
          for (List<FontGlyph> list : mapToListGlyphs.values()) {
             if (!listLengthCounter.containsKey(list.size()))

@@ -1,5 +1,5 @@
 
-import fixedfontocr.ContextualSearchTreeOCR;
+import fixedfontocr.SearchTreeOCRWithLeakedPixels;
 import fixedfontocr.FixedFontOCR;
 import fixedfontocr.SearchTreeOCR;
 import fixedfontocr.glyph.FontGlyph;
@@ -31,7 +31,7 @@ public class VariousTests {
 
       // Build the search nodes for recognizing the glyphs.
       List<String> alphabet = SearchTreeOCR.getDefaultAlphabet();
-      SearchTreeOCR searchTree = new ContextualSearchTreeOCR(alphabet, font);
+      SearchTreeOCR searchTree = new SearchTreeOCRWithLeakedPixels(alphabet, font);
 
       testAllSymbolsRecognized(searchTree, alphabet);
       testSingleLine(searchTree, fontColor);
@@ -76,7 +76,7 @@ public class VariousTests {
 
    /**
     * Same as above, but uses the simplified FixedFontOCR wrapper instead of
-    * ContextualSearchTreeOCR.
+    * SearchTreeOCRWithLeakedPixels.
     */
    protected static void testSimplifiedMultiLine(Color fontColor) {
       int lineHeight = 23;

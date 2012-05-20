@@ -1,6 +1,6 @@
 
-import fixedfontocr.ContextualSearchTreeOCR;
 import fixedfontocr.SearchTreeOCR;
+import fixedfontocr.SearchTreeOCRWithLeakedPixels;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Point;
@@ -26,7 +26,7 @@ public class TestTextFromPhotoshop {
       
       Font font = new Font("Verdana", Font.PLAIN, 16);
       List<String> alphabet = SearchTreeOCR.getDefaultAlphabet();
-      SearchTreeOCR searchTree = new ContextualSearchTreeOCR(alphabet, font);
+      SearchTreeOCR searchTree = new SearchTreeOCRWithLeakedPixels(alphabet, font);
       List<String> lines = 
               searchTree.detectCharactersOnMultipleLines(testImage, Color.BLACK, new Point(0, 0));
       for (String line : lines)

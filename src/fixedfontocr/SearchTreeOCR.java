@@ -149,17 +149,17 @@ public abstract class SearchTreeOCR {
     * This should only be used for fonts which are guaranteed to never leak pixels out of their
     * bounding box.
     *
-    * ContextualSearchTreeOCR should be used in general.
+    * SearchTreeOCRWithLeakedPixels should be used in general.
     */
-   public static class NonContextual extends SearchTreeOCR {
+   public static class Basic extends SearchTreeOCR {
 
       protected SearchNode headNode;
 
-      public NonContextual(List<String> alphabet, Font font) {
+      public Basic(List<String> alphabet, Font font) {
          this(FontGlyph.buildGlyphsFromAlphabet(alphabet, font));
       }
 
-      public NonContextual(List<FontGlyph> fontGlyphs) {
+      public Basic(List<FontGlyph> fontGlyphs) {
          super(fontGlyphs);
          this.headNode = new SearchNode(fontGlyphs);
       }

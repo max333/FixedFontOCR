@@ -1,7 +1,8 @@
 package fixedfontocr;
 
-import fixedfontocr.glyph.ContextualFontGlyph;
 import fixedfontocr.glyph.FontGlyph;
+import fixedfontocr.glyph.FontGlyphShiftedLeft;
+import fixedfontocr.glyph.FontGlyphWithLeakedPixels;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Point;
@@ -17,16 +18,30 @@ import java.util.Set;
  * Some glyphs are recognized as ContextualFontGlyphs, which mean that those cannot appear anywhere
  * on a line, but must have some specific adjacent FontGlyph on the right, or left, or both.
  */
-public class ContextualSearchTreeOCR extends SearchTreeOCR {
+public class SearchTreeOCRWithLeakedPixels extends SearchTreeOCR {
 
    protected Set<FontGlyph> standardStartAlphabet;
    protected Set<FontGlyph> startOfLineAlphabet;
    protected Map<Set<FontGlyph>, SearchNode> nodesCache = new HashMap<>();
 
-   public ContextualSearchTreeOCR(List<String> alphabet, Font font) {
+   public SearchTreeOCRWithLeakedPixels(List<String> alphabet, Font font) {
+      this(alphabet, font, true);
+   }
+
+   /**
+    * 
+    * @param doAddLeftShiftedFontGlyphs if true, will also include the FontGlyphShiftedLeft for each letter
+    * in the alphabet.  The basic FontGlyph for each letter is always included.
+    */
+   public SearchTreeOCRWithLeakedPixels(List<String> alphabet, Font font, boolean doAddLeftShiftedFontGlyphs) {
       super(alphabet, font);
       List<FontGlyph> originalGlyphs = FontGlyph.buildGlyphsFromAlphabet(alphabet, font);
-      FontGlyphClassifier classifier = new FontGlyphClassifier(originalGlyphs);
+      if (doAddLeftShiftedFontGlyphs) {
+         List<FontGlyphShiftedLeft> shiftedGlyphs = FontGlyphShiftedLeft.shiftAlphabetLeft(originalGlyphs);
+         for (FontGlyphShiftedLeft shiftedGlyph : shiftedGlyphs)
+            originalGlyphs.add(shiftedGlyph);
+      }
+      GeneratorOfFontGlyphsWithLeakedPixels classifier = new GeneratorOfFontGlyphsWithLeakedPixels(originalGlyphs);
       standardStartAlphabet = classifier.getAllGlyphsNotRequiringPrecedingGlyph();
       startOfLineAlphabet = classifier.getAllGlyphsWhichCanStartALine();
    }
@@ -40,8 +55,8 @@ public class ContextualSearchTreeOCR extends SearchTreeOCR {
 
    /**
     * @return null if no glyph is recognized, or if a glyph is recognized, but it is a
-    * ContextualFontGlyph and it does not respect its conditions (cannot start a line, or must be
-    * followed by some specified glyphs).
+    * FontGlyphWithLeakedPixels and it does not respect its conditions (cannot start a line, or must
+    * be followed by some specified glyphs).
     */
    protected List<FontGlyph> detectGlyphsOnOneLineRecursive(BufferedImage image, Color fontColor,
            Point topLeft, SearchNode startNode, boolean isStartOfLine) {
@@ -51,8 +66,8 @@ public class ContextualSearchTreeOCR extends SearchTreeOCR {
          return null;
 
       List<FontGlyph> followingGlyphs;
-      if (detectedGlyph instanceof ContextualFontGlyph) {
-         ContextualFontGlyph contextualGlyph = (ContextualFontGlyph) detectedGlyph;
+      if (detectedGlyph instanceof FontGlyphWithLeakedPixels) {
+         FontGlyphWithLeakedPixels contextualGlyph = (FontGlyphWithLeakedPixels) detectedGlyph;
          Set<FontGlyph> successorGlyphs = new HashSet<>();
          successorGlyphs.addAll(contextualGlyph.getPossibleSuccessorGlyphs());
          if (!contextualGlyph.requiresSuccessorGlyph())  // TODO useless since always true

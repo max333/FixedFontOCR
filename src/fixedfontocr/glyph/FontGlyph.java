@@ -208,6 +208,9 @@ public class FontGlyph extends Glyph {
    /**
     * Bitmap fonts are barely used anymore, so FontGlyph (for scalable fonts) 
     * should normally be used instead.
+    * 
+    * <p> Java cannot deal directly with bitmap fonts, so this class reads an image file for
+    * a each character glyph, which the user must generate outside Java.
     */
    // FontGlyph should have been made an abstract class with subclasses BitmapFontGlyph and
    // ScalableFontGlyph.  But bitmap fonts are so rarely used that this "ugly" subclass to

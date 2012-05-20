@@ -143,7 +143,7 @@ public class Glyph {
       return cachedHashCode;
    }
 
-   private int precomputeHashCode() {
+   protected int precomputeHashCode() {
       int hash = 7;
       hash = 47 * hash + Objects.hashCode(this.activePixels);
       return hash;

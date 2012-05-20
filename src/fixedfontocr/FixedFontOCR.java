@@ -8,7 +8,7 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 
 /**
- * Parses a text image and outputs the corresponding text. <p> This class is a wrapper around {@code ContextualSearchTreeOCR}:
+ * Parses a text image and outputs the corresponding text. <p> This class is a wrapper around {@code SearchTreeOCRWithLeakedPixels}:
  * It simplifies the initialization, but it also gives less control.
  */
 public class FixedFontOCR {
@@ -21,7 +21,7 @@ public class FixedFontOCR {
    public FixedFontOCR(String fontName, String fontStyle, int fontSize) {
       Font font = new Font(fontName, convertFontStyle(fontStyle), fontSize);
       List<String> alphabet = SearchTreeOCR.getDefaultAlphabet();
-      searchTree = new ContextualSearchTreeOCR(alphabet, font);
+      searchTree = new SearchTreeOCRWithLeakedPixels(alphabet, font);
    }
    
    /**
