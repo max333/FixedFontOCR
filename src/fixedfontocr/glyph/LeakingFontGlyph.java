@@ -67,7 +67,7 @@ public class LeakingFontGlyph extends FontGlyph {
 
    protected static void checkNoPixelOnLine(BufferedImage image, int iy, String symbol) {
       for (int ix = 0; ix < image.getWidth(); ix++) {
-         if (image.getRGB(ix, iy) == FontGlyph.FOREGROUND_COLOR.getRGB())
+         if (image.getRGB(ix, iy) == FontGlyph.DEFAULT_FOREGROUND_COLOR.getRGB())
             throw new IllegalStateException("The character " + symbol
                     + " is leaking pixels above/below its bounding box.");
       }
@@ -82,7 +82,7 @@ public class LeakingFontGlyph extends FontGlyph {
       List<Point> pixels = new ArrayList<>();
       for (int ix = xStart; ix < xStart + width; ix++)
          for (int iy = yStart; iy < yStart + height; iy++)
-            if (image.getRGB(ix, iy) == FontGlyph.FOREGROUND_COLOR.getRGB())
+            if (image.getRGB(ix, iy) == FontGlyph.DEFAULT_FOREGROUND_COLOR.getRGB())
                pixels.add(new Point(ix - paddingForLeakedPixelSearch, iy - paddingForLeakedPixelSearch));
       return pixels;
    }

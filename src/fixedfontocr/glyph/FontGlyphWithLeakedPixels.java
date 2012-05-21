@@ -9,7 +9,7 @@ import java.util.Set;
  * This can happen if a glyph is leaking pixels in the bounding box of neighboring glyphs,
  * or if a glyph is receiving those leaked pixels.
  */
-public class ContextualFontGlyph extends FontGlyph {
+public class FontGlyphWithLeakedPixels extends FontGlyph {
 
    protected Set<FontGlyph> possibleSuccessorGlyphs;
    // TODO requiresPreceding will always be true since include case of leakerToLeft starting line in FontGlyphClassifier.generateAllCompoundsGlyph
@@ -19,7 +19,7 @@ public class ContextualFontGlyph extends FontGlyph {
    protected boolean canStartLine;
 
    
-   public ContextualFontGlyph(FontGlyph mainGlyph, Set<FontGlyph> possibleGlyphsOnLeft, 
+   public FontGlyphWithLeakedPixels(FontGlyph mainGlyph, Set<FontGlyph> possibleGlyphsOnLeft, 
            Set<FontGlyph> possibleGlyphsOnRight) {
       super(mainGlyph);
       this.requiresPrecedingGlyph = !possibleGlyphsOnLeft.contains(null);
@@ -44,7 +44,7 @@ public class ContextualFontGlyph extends FontGlyph {
 
    /**
     * false if there is at least one combination giving this glyph which does not require a
-    * preceding character to the left. A ContextualFontGlyph for which this property is true could
+    * preceding character to the left. A FontGlyphWithLeakedPixels for which this property is true could
     * not start a line and could only follow a specific glyph(s).
     */
    public boolean requiresPrecedingGlyph() {
